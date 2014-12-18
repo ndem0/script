@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# simply script for brightness manager 
+#
+
+#Customize this stuff
+BRIGHT_DIR="/sys/class/backlight/intel_backlight"   # location bright file
+FILE_BRIGHT="$BRIGHT_DIR/brightness"                # file current level brightness
+CURR_BRIGHT=`cat $FILE_BRIGHT`
+MAX_BRIGHT=`cat "$BRIGHT_DIR/max_brightness"`       # file max level brighteness
+MIN_BRIGHT=300
+STEP=450
+
+
+err() {
+  echo "$1"
+  exit 1
+}
+
+usage() {
+  echo "usage: bright [option] [argument]"
+  echo
+  echo "Options:"
+  echo "     -i, --increase - increase brightness by \`argument'"
+  echo "     -d, --decrease - decrease brightness by \`argument'"
+  echo "     -s, --status   - show current brightness"
+  echo "     -h, --help     - display this"
+  exit 
+}   
+   
+status() {
+    PERC_BRIGHT=$(( $CURR_BRIGHT * 100 / $MAX_BRIGHT))
+    echo "Current brightness: $CURR_BRIGHT [$PERC_BRIGHT%] [$MIN_BRIGHT-$MAX_BRIGHT]"
+    exit
+}
+
+#Argument Parsing
+case "$1" in 
+  '-i'|'--increase')
+    [ "$2" ] && STEP=$2
+    [ -n "$(tr -d [0-9] <<<$2)" ] && err "The argument needs to be an integer."
+    if (( $CURR_BRIGHT >= $(( $MAX_BRIGHT - $STEP)) )); then
+        echo "Level brightness is allready max"
+        BRIGHT=$MAX_BRIGHT
+    else
+        BRIGHT=$(( $CURR_BRIGHT + $STEP ))
+    fi
+    ;;
+  '-d'|'--decrease')
+    [ "$2" ] && STEP=$2 
+    [ -n "$(tr -d [0-9] <<<$2)" ] && err "The argument needs to be an integer."
+    if (( $CURR_BRIGHT <= $(( $MIN_BRIGHT + $STEP)) )); then
+        echo "Level brightness is allready min"
+        BRIGHT=$MIN_BRIGHT
+    else
+        BRIGHT=$(( $CURR_BRIGHT - $STEP ))
+    fi
+    ;;
+  ''|'-h'|'--help')
+    usage
+    ;;
+  '-s'|'--status')
+    status
+    ;;
+  *)
+    err "Unrecognized option \`$1', see dvol --help"
+    ;;
+esac
+
+#Actual volume changing (readability low)
+echo -n $BRIGHT > $FILE_BRIGHT
+#/home/nicola/.scripts/dzen_bar.sh $BRIGHT -p 0 -o 50 -min $MIN_BRIGHT -max $MAX_BRIGHT

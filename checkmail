@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Default Setting
+SECS="2"            # sleep $SECS
+#BG="#0d0b0d"        # background colour of window
+BG="#143A58"
+FG="#f3e7c6"        # foreground colour of text/icon
+HEIGHT="30"         # window height
+WIDTH="100"         # window width
+BAR_FG="#d6c08f"    # foreground colour of volume bar
+BAR_BG="#090909"    # background colour of volume bar
+BAR_WIDTH="100"     # width of volume bar
+BAR_HEIGHT="3"
+FONT="-*-gohufont-medium-*-*-*-11-*-*-*-*-*-*-*"
+ICON="$HOME/.dzen/xbm/mail.xbm"
+
+############################################################
+## POSITION
+
+RESX=`xdpyinfo | grep dimension | awk '{print$2}' | cut -f 1 -d "x"`
+RESY=`xdpyinfo | grep dimension | awk '{print$2}' | cut -f 2 -d "x"`
+X=$(($RESX - $WIDTH - 20))
+dzen_args=( -p -w "$WIDTH" -h "$HEIGHT" -x $X -y 20 -fn "$FONT" -bg "$BG" -fg "$FG" -e "button1=exec:urxvtc -e mutt;button1=exit;button3=exit")
+
+############################################################
+
+RCFILES=`ls $HOME/.getmail/ | grep ^getmail`
+for i in $RCFILES; do getmail -q -r $i; done
+
+if [[ `$HOME/.scripts/newmail` -gt "0" ]]; then
+ 	(echo -n "^i($ICON) "; echo "New Mail") | dzen2 "${dzen_args[@]}"
+fi

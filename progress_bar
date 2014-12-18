@@ -1,0 +1,59 @@
+#!/bin/bash
+
+## Default Setting
+MAX="100"
+MIN="0"
+LEN="10"
+FULL="»"
+EMPTY=" "
+
+while [[ $# -ne 0 ]]; do
+	case $1 in
+		'-max')	
+			[[ -z $2 ]] && echo "Invalid syntax" && exit 1
+			MAX=$2
+			shift 2
+			;;
+		'-min')	
+			[[ -z $2 ]] && echo "Invalid syntax" && exit 1
+			MIN=$2
+			shift 2
+			;;
+		'-len')	
+			[[ -z $2 ]] && echo "Invalid syntax" && exit 1
+			LEN=$2
+			shift 2
+			;;
+		'-full')	
+			[[ -z $2 ]] && echo "Invalid syntax" && exit 1
+			FULL=$2
+			shift 2
+			;;
+		'-empty')	
+			[[ -z $2 ]] && echo "Invalid syntax" && exit 1
+			EMPTY=$2
+			shift 2
+			;;
+		*)
+			[[ ! $1 =~ ^[0-9]+$ ]] && echo "Invalid value" && exit 1
+			ARG=$1
+			shift 1
+			;;
+	esac
+done
+
+STEP=$(( ($MAX - $MIN) / $LEN))
+
+echo -n "["
+if [[ $ARG == $MIN ]]; then
+	for I in `seq $MIN $STEP $MAX`; do echo -n "$EMPTY"; done
+else
+	for I in `seq $MIN $STEP $MAX`; do
+		if [[ $ARG -ge $I ]]; then
+			echo -n "$FULL"
+		else
+			echo -n "$EMPTY"
+		fi
+	done
+fi
+echo "]"

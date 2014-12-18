@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Default Setting
+SECS="2"            # sleep $SECS
+#BG="#0d0b0d"        # background colour of window
+BG="#143A58"
+FG="#f3e7c6"        # foreground colour of text/icon
+HEIGHT="30"         # window height
+WIDTH="150"         # window width
+BAR_FG="#d6c08f"    # foreground colour of volume bar
+BAR_BG="#090909"    # background colour of volume bar
+BAR_WIDTH="100"     # width of volume bar
+BAR_HEIGHT="3"
+FONT="-*-gohufont-medium-*-*-*-*-*-*-*-*-*-*-*"
+ICON1="$HOME/.dzen/xbm/pacman.xbm"
+ICON2="$HOME/.dzen/xbm/bug_02.xbm"
+MAX=100
+MIN=0
+PIPE="/tmp/ws"
+
+############################################################
+
+RESX=`xdpyinfo | grep dimension | awk '{print$2}' | cut -f1 -d "x"`;
+X=$(($RESX / 2 - $WIDTH / 2))
+dzen_args=( -w "$WIDTH" -h "$HEIGHT" -x $X -y 20 -fn "$FONT" -bg "$BG" -fg "$FG")
+
+############################################################
+
+NDESK=`xprop -root _NET_NUMBER_OF_DESKTOPS | cut -f3 -d " "`
+CURR_DESK=`xprop -root _NET_CURRENT_DESKTOP | cut -f3 -d " "`
+OUT=`seq 0 $(($NDESK - 1))| sed "s/$CURR_DESK/\^i\(\/home\/nicola\/\.dzen\/xbm\/pacman\.xbm\)/g" | 
+	sed "s/[0-9]/·/g"`
+	
+if [ ! -e "$PIPE" ]; then
+  	mkfifo "$PIPE"
+ 	(dzen2 "${dzen_args[@]}" < "$PIPE"; rm -f "$PIPE") &
+fi
+
+(
+ 	echo $OUT;
+	sleep $SECS
+) > $PIPE

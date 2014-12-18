@@ -1,0 +1,9 @@
+#!/bin/bash
+ACC=(`ls $HOME/Mail`)
+MAILCOUNT=0
+
+for i in `seq 1 ${#ACC[@]}`; do
+	MAILCOUNT=$(($MAILCOUNT | `ls $HOME/Mail/${ACC[(($i - 1))]}/inbox/new | wc -l`))
+done
+
+echo $MAILCOUNT

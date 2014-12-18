@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# Default Setting
+SECS="2"            # sleep $SECS
+#BG="#0d0b0d"        # background colour of window
+BG="#143A58"
+FG="#f3e7c6"        # foreground colour of text/icon
+HEIGHT="30"         # window height
+WIDTH="150"         # window width
+BAR_FG="#d6c08f"    # foreground colour of volume bar
+BAR_BG="#090909"    # background colour of volume bar
+BAR_WIDTH="100"     # width of volume bar
+BAR_HEIGHT="3"
+FONT="-*-gohufont-medium-*-*-*-*-*-*-*-*-*-*-*"
+ICON="$HOME/.dzen/xbm/half.xbm"
+MAX=100
+MIN=0
+PIPE="/tmp/bright"
+
+############################################################
+
+dzen_args=( -w "$WIDTH" -h "$HEIGHT" -x 20 -y 70 -fn "$FONT" -bg "$BG" -fg "$FG")
+gdbar_args=( -w "$BAR_WIDTH" -h "$BAR_HEIGHT" -bg "$BAR_BG" -fg "$BAR_FG")
+
+############################################################
+
+LEVEL=`bright -s`
+
+if [ ! -e "$PIPE" ]; then
+  	mkfifo "$PIPE"
+ 	(dzen2 "${dzen_args[@]}" < "$PIPE"; rm -f "$PIPE") &
+fi
+
+(
+	echo -n "^i($ICON) "; 
+	echo $LEVEL | awk '{print$4}' | sed 's/[^0-9.]//g' | dzen2-gdbar "${gdbar_args[@]}"; 
+	sleep $SECS
+) > $PIPE

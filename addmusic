@@ -1,0 +1,44 @@
+#!/bin/bash
+
+ERROR_CODE=-1
+SUCCESS_CODE=0
+MUSIC_DIR=$HOME"/Music"
+
+
+###############################################################################
+
+
+error() {
+	echo $1
+	exit $ERROR_CODE
+}
+
+usage() {
+	echo 
+	echo "Usage: ./organize <path to add> [option]"
+	echo
+	exit $SUCCESS_CODE
+}
+
+
+###############################################################################
+
+[[ -z "$@" ]] && usage
+for i in "$@"; do
+	[ -f "$i" ] && FILE=("$i") || usage
+	[ ! -d $MUSIC_DIR ] && mkdir $MUSIC_DIR
+
+	id3v2 -C "$FILE" > /dev/null
+	ARTIST=`id3v2 -l "$FILE" | sed -n /TPE1/p | cut -f 2 -d : | sed -e "s/^ //g" | tr -cd "[:print:]"`
+	ALBUM=`id3v2 -l "$FILE" | sed -n /TALB/p | cut -f 2 -d : | sed -e "s/^ //g" | tr -cd "[:print:]"`
+	TITLE=`id3v2 -l "$FILE" | sed -n /TIT2/p | cut -f 2 -d : | sed -e "s/^ //g" | tr -cd "[:print:]"`
+ 
+	[ ! -d "$MUSIC_DIR"/"$ARTIST" ] && mkdir "$MUSIC_DIR"/"$ARTIST"
+	[ ! -d "$MUSIC_DIR"/"$ARTIST"/"$ALBUM" ] && mkdir "$MUSIC_DIR"/"$ARTIST"/"$ALBUM"
+
+	mv "$FILE" "$MUSIC_DIR"/"$ARTIST"/"$ALBUM"/"$TITLE.mp3"
+	echo "Moving $FILE to "$MUSIC_DIR"/"$ARTIST"/"$ALBUM"/"$TITLE.mp3""
+done
+
+echo "Done. Exit.."
+exit $SUCCESS_CODE

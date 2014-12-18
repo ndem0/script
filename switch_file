@@ -1,0 +1,15 @@
+#!/bin/bash
+
+function usage() {
+	echo -e "usage:\tswitch file first_file second_file"
+	exit
+}
+
+# Check input
+[[ $# != 2 ]] && usage
+# check if files exist
+[[ ! -f $1 || ! -f $2 ]] && echo "File not valid" && exit
+
+mv $1 tmp
+mv $2 $1
+mv tmp $2

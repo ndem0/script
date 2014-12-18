@@ -1,0 +1,55 @@
+#!/bin/bash
+
+
+function extr() {
+
+	VALID_FORMAT=1
+
+	(
+	case "$1" in
+		*.7z      ) 7z  x       "$1"                ;;
+		*.tar.bz2 ) tar xvjf    "$1"                ;;
+		*.bz2     ) bunzip2     "$1"                ;;
+		*.deb     ) ar  vx      "$1"                ;;
+		*.tar.gz  ) tar xvf     "$1"                ;;
+		*.gz      ) gunzip      "$1"                ;;
+		*.tar     ) tar xvf     "$1"                ;;
+		*.tbz2    ) tar xvjf    "$1"                ;;
+		*.tar.xz  ) tar xvf     "$1"                ;;
+		*.tgz     ) tar xvzf    "$1"                ;;
+		*.rar     ) unrar x     "$1"                ;;
+		*.zip     ) unzip       "$1"                ;;
+		*.Z       ) uncompress  "$1"                ;;
+		*         ) echo " Unsupported file format"
+					VALID_FORMAT=0 					;;
+	esac
+	) > /dev/null
+
+	echo $VALID_FORMAT
+}
+
+############################################################
+# MAIN
+
+# Display usage if no parameters given
+if [[ -z "$@" ]]; then
+	echo " ${0##*/} <archive> - extract common file formats)"
+	exit
+fi
+
+REMOVE=0
+[[ "$1" == "-remove" ]] && REMOVE=1 && shift 1
+
+# Test if file exists
+for file in "$@"; do
+	
+	if [ ! -f "$file" ]; then
+		echo "File "$file" doesn't exist"
+	else
+		echo -n "Extracting $file... "
+		VALID=`extr $file`
+		
+		[[ $VALID -eq 1 ]] && echo "[ OK ]"
+		[[ $VALID -eq 1 && $REMOVE -eq 1 ]] && rm -rf $file && echo "Removed $file"
+	fi
+done
